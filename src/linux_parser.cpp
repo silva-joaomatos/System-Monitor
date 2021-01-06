@@ -3,11 +3,13 @@
 #include <string>
 #include <vector>
 #include "linux_parser.h"
-
 using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+#if X_DEBUG
+  #include <iostream>
+#endif
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
@@ -66,14 +68,14 @@ vector<int> LinuxParser::Pids() {
   return pids;
 }
 
-// TODO: Read and return the system memory utilization
+//Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { 
   string keyword;
   float memTotal;
   float memFree;
-  float memAvailable;
+//  float memAvailable;
   float memBuffer;
-  float memCached;
+//  float memCached;
   string value;
   std::ifstream stream(kProcDirectory + kMeminfoFilename);
   if (stream.is_open()) {
@@ -86,18 +88,18 @@ float LinuxParser::MemoryUtilization() {
           stream >> value;
           memFree = stof(value);
         }
-        if (keyword == "MemAvailable:") {
-          stream >> value;
-          memAvailable = stof(value);
-        }
         if (keyword == "Buffers:"){
           stream >> value;
           memBuffer = stof(value);
         }
+       /* if (keyword == "MemAvailable:") {
+          stream >> value;
+          memAvailable = stof(value);
+        }
         if (keyword == "Cached:"){
           stream >> value;
           memCached = stof(value);
-        }
+        }*/
       }
   }
   return 1 - memFree / (memTotal - memBuffer);
@@ -132,7 +134,38 @@ long LinuxParser::ActiveJiffies() { return 0; }
 long LinuxParser::IdleJiffies() { return 0; }
 
 // TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+vector<string> LinuxParser::CpuUtilization() {
+  vector<string> cpu{};
+  string keyword, value,line;
+  std::ifstream filestream(kProcDirectory + kStatFilename);
+  if (filestream.is_open()) {
+      std::istringstream stream(keyword);
+    while (std::getline(filestream, line)) {
+      std::istringstream linestream(line);
+            while (linestream >> keyword) {   
+              stream >> keyword;
+              if (keyword == "cpu") {
+                while(linestream >> value) {
+                  stream >> value;
+                  cpu.push_back(value);
+                }
+              }
+            }
+    }
+  }
+  //debug statements
+#if X_DEBUG
+  std::cout <<"_________________________\n";
+  std::cout << "cpu.size: " << cpu.size() << "\n";
+  std::cout <<"_________________________\n";
+  for (unsigned int i=0; i< cpu.size() ; i++) {
+    std::cout << cpu[i] << "\n";
+  }
+#endif
+
+  //return vector
+  return cpu;
+}
 
 //Read and return the total number of processes
 int LinuxParser::TotalProcesses() { 
