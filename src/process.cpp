@@ -14,7 +14,7 @@ using std::vector;
 int Process::Pid() { return 0; }
 
 // TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return 0; }
+float Process::CpuUtilization() { return 0.0; }
 
 // TODO: Return the command that generated this process
 string Process::Command() { return string(); }
