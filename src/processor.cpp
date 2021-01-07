@@ -9,6 +9,6 @@ float Processor::Utilization() {
     float cpuLoad{0.0};
     active_ = LinuxParser::ActiveJiffies();
     idle_ = LinuxParser::IdleJiffies();
-    cpuLoad = active_ / (active_+idle_);    // cn be updated to store previous value and re-read active/idle
+    cpuLoad = active_ / (active_+idle_);    // can be updated to store previous value and re-read active/idle
     return cpuLoad;
 }
