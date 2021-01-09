@@ -7,6 +7,8 @@ int main() {
   //LinuxParser::CpuUtilization();
   LinuxParser::Ram(12878); //telegram-desktop as example running currently
   LinuxParser::Command(12878);
+  LinuxParser::Uid(12878);
+  Process::Ram(12878);
 #else
   NCursesDisplay::Display(system);
 #endif
