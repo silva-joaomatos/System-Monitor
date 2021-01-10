@@ -8,6 +8,7 @@ It contains relevant attributes as shown below
 */
 class Process {
  public:
+  Process(int); 
   int GetPid();
   std::string User();
   std::string Command();
@@ -15,13 +16,14 @@ class Process {
   std::string Ram();
   long int UpTime();
   
-  void SetPid(int);
-  void User(int);
-  void Command(int);
+
   void CpuUtilization(int);
+
+  /*void User(int);
+  void Command(int);
   void Ram(int);
   void UpTime(int);
-  
+  */
 // Operators overload
   bool operator<(Process const& a) const;
   bool operator>(Process const& a) const;
@@ -34,8 +36,7 @@ class Process {
     std::string command_{""};
     float CPUutilization_{0.0};
     std::string ram_{""};
-    long up_time_{0};
-
+    long Uptime_{0};
 };
 
 #endif

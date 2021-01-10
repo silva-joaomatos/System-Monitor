@@ -22,16 +22,10 @@ vector<Process>& System::Processes() {
   vector<int> procID = LinuxParser::Pids();
   processes_.clear();
   for(int pid: procID) {
-    Process process;
-    process.SetPid(pid);
-    process.User(pid);
-    process.Command(pid);
-    process.CpuUtilization(pid);
-    process.Ram(pid);
-    process.UpTime(pid);
-    processes_.push_back(process);
+    Process process(pid); //create an object for each process (constructor fills all parameters)
+    processes_.push_back(process); // fill the output vector
   }
-  std::sort(processes_.begin(), processes_.end(), std::greater<Process>());
+  std::sort(processes_.begin(), processes_.end(), std::greater<Process>()); // sort by cpu utilization
   return processes_; 
 }
 

@@ -118,7 +118,7 @@ long LinuxParser::Jiffies() {
 
 //Read and return the number of active jiffies for a PID
 long LinuxParser::ActiveJiffies(int pid) { 
-   long a_jiffies = 0;
+   long Activejiffies{0};
   string utime;
   string stime;
   string line;
@@ -132,8 +132,8 @@ long LinuxParser::ActiveJiffies(int pid) {
     }
     linestream >> utime >> stime;
   }
-  a_jiffies = std::atol(utime.c_str()) + std::atol(stime.c_str());
-  return a_jiffies;
+  Activejiffies = std::stol(utime) + std::stol(stime);
+  return Activejiffies;
 }
 
 
@@ -171,7 +171,7 @@ vector<string> LinuxParser::CpuUtilization() {
             }
     }
   }
-  //debug statements to activate change X_DEBUG in linux_parser.h
+  //debug statements to activate change X_DEBUG in linux_parser. not compiled!
 #if X_DEBUG
   std::cout <<"_________________________\n";
   std::cout << "cpu.size: " << cpu.size() << "\n";
@@ -283,41 +283,40 @@ string LinuxParser::Uid(int proc) {
 // Read and return the user associated with a process
 string LinuxParser::User(int pid) { 
  string line;
-  string test_user;
-  string test_uid;
+  string CurrentUid;
   string skip;
-  string user = "n/a";
-  string uid = LinuxParser::Uid(pid);
+  string username = "n/a";
+  string Uid = LinuxParser::Uid(pid);
   std::ifstream stream(kPasswordPath);
-  bool search = true;
   if (stream.is_open()) {
-    while(search && stream.peek() != EOF ) {
+    while(stream) {
       std::getline(stream, line);
       std::replace(line.begin(), line.end(), ':', ' ');
       std::istringstream linestream(line); 
-      linestream >> test_user >> skip >> test_uid;
-      if(uid == test_uid) {
-        user = test_user;
-        search = false;
+      linestream >> username >> skip >> CurrentUid;
+      if(CurrentUid == Uid ) {
+        return username;
       }
     }
   }
-  return user; 
+  return username; 
 }
 
-//Read and return the uptime of a process
+//Read and return the uptime of a process process ticks on 22nd position on /proc/"PID"/stat file
 long int LinuxParser::UpTime(int pid) {
-  long int time{0};
-  string s_time;
+  string ignore, procticks, line;
   std::ifstream stream(LinuxParser::kProcDirectory + to_string(pid) +
                        LinuxParser::kStatFilename);
   if (stream.is_open()) {
-    for (int i = 0; stream >> s_time; ++i)
-      if (i == 13) {
-        long int time{stol(s_time)};
-        time /= sysconf(_SC_CLK_TCK);
-        return time;
-      }
+      std::getline(stream, line);
+      std::istringstream linestream(line); 
+    for(int i = 0; i <= 22; ++i) {
+      linestream >> ignore;
+      std::istringstream linestream(line); 
+
+    }
+    linestream >> procticks;
+     return stol(procticks) / sysconf(_SC_CLK_TCK);
   }
-  return time;
+  return 0;
 }
