@@ -49,20 +49,15 @@ long int Process::UpTime() {
   return this->Uptime_;
   }
 
-//Overloads the less operator according to cpu utilization
-bool Process::operator<(Process const& a) const { 
-  return this->CPUutilization_ < a.CPUutilization_;
-  } 
-
 // Overloads the greater operator according to cpu utilization
 bool Process::operator>(Process const& a) const { 
-  return this->CPUutilization_ > a.CPUutilization_;
+  return this->CPUutilization_ > a.CPUutilization_ ? true:false;
   }
 
 void Process::CpuUtilization(int pid) {
-  float a_process = static_cast<float>(LinuxParser::ActiveJiffies(pid));
-  float a_processor = static_cast<float>(LinuxParser::ActiveJiffies());
-  CPUutilization_ = a_process / a_processor;
+  float process = LinuxParser::ActiveJiffies(pid);
+  float processor = LinuxParser::ActiveJiffies();
+  CPUutilization_ = process / processor;
   }
 
 

@@ -71,9 +71,9 @@ vector<int> LinuxParser::Pids() {
 //Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { 
   string keyword;
-  float memTotal;
-  float memFree;
-  float memBuffer;
+  float memTotal{0.0};
+  float memFree{0.0};;
+  float memBuffer{0.0};
   string value;
   std::ifstream stream(kProcDirectory + kMeminfoFilename);
   if (stream.is_open()) {
@@ -118,26 +118,27 @@ long LinuxParser::Jiffies() {
 
 //Read and return the number of active jiffies for a PID
 long LinuxParser::ActiveJiffies(int pid) { 
-   long Activejiffies{0};
+  long Activejiffies{0};
+  std::ifstream filestream(LinuxParser::kProcDirectory + to_string(pid) + LinuxParser::kStatFilename);
   string utime;
   string stime;
   string line;
-  string skip;
+  string ignore;
   std::ifstream stream(kProcDirectory + std::to_string(pid)+ kStatFilename);
   if (stream.is_open()) {
     std::getline(stream, line);
     std::istringstream linestream(line); 
-    for(int i = 1; i < 14; ++i) {
-      linestream >> skip;
+    for(int i = 0; i < 13; ++i) {
+      linestream >> ignore; // looking for fields 14-15
     }
-    linestream >> utime >> stime;
+    linestream >> utime >> stime; 
   }
-  Activejiffies = std::stol(utime) + std::stol(stime);
+  Activejiffies = std::atol(utime.c_str()) + std::atol(stime.c_str());
   return Activejiffies;
 }
 
 
-//Read and return the number of active jiffies for the system
+//Read and return the number of active jiffies for the system (not idle not wait)
 //CPUStates as defined in linux_parser.h
 long LinuxParser::ActiveJiffies() {
   vector<string> Activetime = CpuUtilization();
@@ -145,7 +146,7 @@ long LinuxParser::ActiveJiffies() {
           stol(Activetime[CPUStates::kIRQ_]) + stol(Activetime[CPUStates::kSoftIRQ_]) + stol(Activetime[CPUStates::kSteal_]) + 
           stol(Activetime[CPUStates::kGuest_]) + stol(Activetime[CPUStates::kGuestNice_]));
 }
-//Read and return the number of idle jiffies for the system
+//Read and return the number of idle jiffies for the  (Idle + wait)
 long LinuxParser::IdleJiffies() { 
   vector<string> Idletime = CpuUtilization();
   return (stol(Idletime[CPUStates::kIdle_]) + stol(Idletime[CPUStates::kIOwait_]));
@@ -249,7 +250,8 @@ string LinuxParser::Ram(int proc) {
 #if X_DEBUG
   std::cout << "Ram: " << value << "\n";
 #endif
-        return value;
+      int ramMB = stoi(value) / 1024;
+        return to_string(ramMB);
       }
     }
 
@@ -304,19 +306,16 @@ string LinuxParser::User(int pid) {
 
 //Read and return the uptime of a process process ticks on 22nd position on /proc/"PID"/stat file
 long int LinuxParser::UpTime(int pid) {
-  string ignore, procticks, line;
-  std::ifstream stream(LinuxParser::kProcDirectory + to_string(pid) +
-                       LinuxParser::kStatFilename);
+  long int Uptime{0};
+  string utime;
+  std::ifstream stream(LinuxParser::kProcDirectory + to_string(pid) + LinuxParser::kStatFilename);
   if (stream.is_open()) {
-      std::getline(stream, line);
-      std::istringstream linestream(line); 
-    for(int i = 0; i <= 22; ++i) {
-      linestream >> ignore;
-      std::istringstream linestream(line); 
-
-    }
-    linestream >> procticks;
-     return stol(procticks) / sysconf(_SC_CLK_TCK);
+    for (int i = 0; stream >> utime; ++i)
+      if (i == 13) {  //13th position of stat file = utime
+        Uptime = stol(utime);
+        Uptime = Uptime / sysconf(_SC_CLK_TCK);
+        return Uptime;
+      }
   }
-  return 0;
+  return Uptime;
 }

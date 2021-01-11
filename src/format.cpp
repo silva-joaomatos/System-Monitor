@@ -6,23 +6,15 @@
 using std::string;
 using std::to_string;
 
-/*std::string Format::Pad(string s, char c) {
-  s.insert(s.begin(), 2 - s.size(), c);
-  return s;
-}
-<< setw(2) << setfill('0') << hh << ":"
-                             << setw(2) << setfill('0') << mm << ":"
-                             << setw(2) << setfill('0') << ss << 
-*/
-
+#define HOUR_SEC 3600
+#define MIN_SEC 60
 string Format::ElapsedTime(long int time) {
-  int hours = time / (60 * 60);
-  int minutes = (time / 60) % 60;
-  long seconds = time % 60;
+  unsigned int hours = time / (HOUR_SEC);
+  unsigned int minutes = (time / MIN_SEC) % MIN_SEC;
+  unsigned int seconds = time % MIN_SEC;
   std::stringstream formated;
-   formated << std::setw(2) << std::setfill('0') 
-            << hours << ":" << std::setw(2) << std::setfill('0') 
-            << minutes << ":" << std::setw(2) << std::setfill('0') 
-            << seconds;
+   formated << std::setw(2) << std::setfill('0') << hours << ":" 
+            << std::setw(2) << std::setfill('0') << minutes << ":" 
+            << std::setw(2) << std::setfill('0') << seconds;
   return formated.str();
 }
