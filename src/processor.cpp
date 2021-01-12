@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 //Return the aggregate CPU utilization
-float Processor::Utilization() { 
-    float cpuLoad{0.0};
+double Processor::Utilization() { 
+    double cpuLoad{0.0};
     active_ = LinuxParser::ActiveJiffies();
     idle_ = LinuxParser::IdleJiffies();
     cpuLoad = (active_ / (active_ + idle_));
