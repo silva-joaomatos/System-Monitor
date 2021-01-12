@@ -105,7 +105,7 @@ long LinuxParser::UpTime() {
     std::getline(stream, line);
     std::istringstream stream(line);
     if (stream >> s_uptime) {
-      return stoi(s_uptime);
+      return stol(s_uptime);
     }
   }
   return 0;
@@ -306,15 +306,15 @@ string LinuxParser::User(int pid) {
 
 //Read and return the uptime of a process process ticks on 22nd position on /proc/"PID"/stat file
 long int LinuxParser::UpTime(int pid) {
-  long int Uptime{0};
+  long int Uptime{0}, uptimepid{0};
   string utime;
   std::ifstream stream(LinuxParser::kProcDirectory + to_string(pid) + LinuxParser::kStatFilename);
   if (stream.is_open()) {
-    for (int i = 0; stream >> utime; ++i)
-      if (i == 13) {  //13th position of stat file = utime
+    for (int i = 1; stream >> utime; ++i)
+      if (i == 22) {  //22th position of stat file = utime
         Uptime = stol(utime);
-        Uptime = Uptime / sysconf(_SC_CLK_TCK);
-        return Uptime;
+        uptimepid = UpTime() - Uptime / sysconf(_SC_CLK_TCK); //from code-review! computed time to be subtracted to overall time
+        return uptimepid;
       }
   }
   return Uptime;
